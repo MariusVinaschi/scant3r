@@ -37,7 +37,6 @@ this the modules we providing for our community for you need new module open an 
 | **ssrf**       | simple ssrf scanner                                          |
 | **cve**        | cve checks module wtih python scripts and YAML template      |
 | **firebase**   | checks for public firebase database (write/read) permission  |
-| **paths**      | checking for custom paths                                    |
 | **xss**        | inject xss payload in parameter value                        |
 | **sqli**       | simple sqli scanner                                          |
 | **rce**        | simple RCE scanner
