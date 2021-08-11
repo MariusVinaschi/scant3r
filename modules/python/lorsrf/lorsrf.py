@@ -70,7 +70,7 @@ class Lorsrf(Scan):
         newurl = self.opts['url']
         allu = []
         for par in ssrf_parameters():
-            pay = f"{self.opts['host']}/{par}"
+            pay = f"{par}.{self.opts['host']}"
             newurl += self.check_url(newurl, par, pay)
             if len(urlparse(newurl).query.split('=')) == parameters_in_one_request + 1:
                 allu.append(newurl)
