@@ -6,6 +6,7 @@ __version__ = '0.8#Beta'
 import random
 import logging
 import re
+from typing import Union
 from .colors import Colors
 from .requester import Http
 from .data import dump_request
@@ -66,7 +67,7 @@ def alert_script(name: str, command: str, **kwargs) -> dict:
 
 
 # Alert about bugs
-def alert_bug(name: str, http: Http, **kwargs) -> dict:
+def alert_bug(name: str, http: Http, url: Union[str, None] = None, json: bool = False, **kwargs) -> dict:
     output = f'\n{Colors.good} {Colors.red}{name}{Colors.rest}: {http.request.url.split("?")[0]}'
     output += f'\n  Method: {http.request.method}'
     extra_text = ''
@@ -83,7 +84,8 @@ def alert_bug(name: str, http: Http, **kwargs) -> dict:
     '''
     target = urlparse(http.request.url).netloc
     # display the output in console
-    logger.info(output)
+    if not json:
+        logger.info(output)
 
     try:
         mkdir(f'log/{target}')
@@ -109,7 +111,10 @@ def alert_bug(name: str, http: Http, **kwargs) -> dict:
 ''', re.VERBOSE).sub('', output)  # remove colors value from text
     output_file.write(output)
     output_file.close()
-    return {'Name': name, 'request': dump_request(http), 'output': kwargs}
+    if url is None:
+        return {'name': name, 'request': dump_request(http), 'output': kwargs}
+    else:
+        return {'name': name, 'url': url, 'request': dump_request(http), 'output': kwargs}
 
 
 # Display errors

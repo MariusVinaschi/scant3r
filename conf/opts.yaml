@@ -219,3 +219,13 @@ timeout:
   - help: 'set connection timeout (default: 10)'
   - save_content: true
   - exec: "dict_args['timeout'] = value"
+
+json:
+  - option: 
+    - '-j'
+    - '--json'
+  - type: boolean
+  - default: false
+  - help: 'Return the result in json'
+  - save_content: false
+  - exec: "dict_args['json'] = value"

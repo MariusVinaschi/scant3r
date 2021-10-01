@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from core.libs import random_str, alert_bug, insert_to_params_urls, Http
+from core.libs import random_str, insert_to_params_urls, Http
 from urllib.parse import urlparse
 from wordlists import XSS
 from modules import Scan
@@ -22,6 +22,7 @@ class Xss(Scan):
         return method_allowed
 
     def start(self) -> dict:
+        list_xss = []
         for method in self.opts['methods']:
             list_potential_vulnerable_url: list = []
             txt = f'scan{random_str(3)}tr'
@@ -33,7 +34,7 @@ class Xss(Scan):
             new_url = insert_to_params_urls(target_url, txt)
             response = self.send_request(method, new_url)
 
-            if type(response) != list:
+            if type(response) is not list:
                 if txt in response.text:
                     list_potential_vulnerable_url.append(new_url)
 
@@ -45,9 +46,20 @@ class Xss(Scan):
                         payload_url = potential_vulnerable_url.replace(txt, payload)
                         response = self.send_request(method, payload_url)
                         if response != 0 and payload in response.text:
-                            alert_bug('XSS', response, **{
+                            list_xss.append({
+                                'vuln': 'XSS',
+                                "response": response,
                                 'params': urlparse(payload_url).query,
-                                'payload': payload,
+                                "payload": payload
                             })
 
-        return {}
+        if len(list_xss) > 0:
+            return {
+                "message": "vulnerabilities",
+                "vulns": list_xss
+            }
+
+        return {
+            "message": "No Vuln find in this url",
+            "url": self.opts['url']
+        }
