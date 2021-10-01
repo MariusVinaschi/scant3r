@@ -60,6 +60,6 @@ class Xss(Scan):
             }
 
         return {
-            "message": "No Vuln find in this url",
+            "message": "No xss find in this url",
             "url": self.opts['url']
         }

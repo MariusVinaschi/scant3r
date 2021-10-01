@@ -1,7 +1,6 @@
 from .xss import Xss
 from urllib.parse import urlparse as ur
-from core.libs import alert_bug
-from core.libs import Http
+from core.libs import Http, alert_bug
 from logging import getLogger
 
 log = getLogger('scant3r')
@@ -26,12 +25,12 @@ def main(opts: dict, http: Http):
                         'params': vuln['params'],
                         'payload': vuln['payload'],
                     }
-                )    
+                )
                 list_xss.append(xss)
 
             if opts['json']:
                 print(list_xss)
         else:
-            log.debug('XSS: No Vuln find')
+            log.debug('XSS: No vuln find')
     else:
         log.debug('XSS: NO URL QUERY')
