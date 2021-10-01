@@ -13,7 +13,8 @@ class Upload(Scan):
         self.filename = "extension_prog_langugage.json"
         self.path_reverse_shell = "reverse_shell"
 
-    def start(self):
+    def start(self) -> list:
+        list_file_upload = []
         response = self.send_request(
             method="GET",
             url=self.opts['url']
@@ -23,14 +24,20 @@ class Upload(Scan):
 
         forms = self.get_lists_form(content_html)
         if not forms:
-            self.log.error('No form on this webpage')
-            return None
+            message = 'No form on this webpage'
+            self.log.error(message)
+            return {
+                "message": message
+            }
 
         forms_with_upload = self.find_interresting_form(forms)
 
         if not forms_with_upload:
-            self.log.error("No form where you can upload file")
-            return None
+            message = "No input where you can upload file"
+            self.log.error(message)
+            return {
+                "message": message
+            }
 
         for index in forms_with_upload:
             form = forms[index]
@@ -55,8 +62,11 @@ class Upload(Scan):
             # associate language to extension
             extension = self.associate_prog_extension(programming_language)
             if not extension:
-                self.log.error("No reverse shell for this programming langugage")
-                return None
+                message = "No reverse shell for this programming langugage"
+                self.log.error(message)
+                return {
+                    "message": message
+                }
 
             # Name input
             name_input_upload = self.find_name_input_upload(form)
@@ -72,11 +82,26 @@ class Upload(Scan):
                     path_reverse_shell_file=path_reverse_shell_file
                 )
 
-                results = [executor.submit(self.execute_file_upload, form['action'], file, data, error_text) for file in files]
+                results = [executor.submit(self.execute_file_upload,
+                                           form['action'],
+                                           file,
+                                           data,
+                                           error_text) for file in files]
 
                 for f in concurrent.futures.as_completed(results):
                     if f.result()['is_upload']:
-                        print(f.result()['message'])
+                        list_file_upload.append(f.result())
+
+        if len(list_file_upload) > 0:
+            return {
+                "message": "vulnerabilities",
+                "vulns": list_file_upload
+            }
+
+        return {
+            "message": "No xss find in this url",
+            "url": self.opts['url']
+        }
 
     def find_interresting_form(self, forms: list) -> list:
         """Find the index of form where file upload is ok
@@ -242,10 +267,11 @@ class Upload(Scan):
         if error_text not in response.content.decode('utf-8'):
             return {
                 "is_upload": True,
+                "response": response,
                 "message": files["message"]
             }
-        else:
-            return {
-                "is_upload": False,
-                "message": files["message"]
-            }
+        return {
+            "is_upload": False,
+            "response": response,
+            "message": files["message"]
+        }
